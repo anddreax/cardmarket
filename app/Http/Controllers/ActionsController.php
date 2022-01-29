@@ -105,7 +105,7 @@ class ActionsController extends Controller
                 }else{
                     $card = new cards();
                     $card->name  = "card".$data->id_card;
-                    $card->description  = "Introduce la descripcion d ela carta";
+                    $card->description  = "Introduce la descripcion de la carta";
                     $collection->save();
                     $card->save();
                     $response['card'] = "Card Save";
@@ -217,7 +217,7 @@ class ActionsController extends Controller
             if ($logedUser){
                 $sales = DB::table('cards')->join('sales','sales.id_card', '=','cards.id')
                                            ->join('users','sales.id_user', '=','users.id')
-                                           ->select('cards.name', 'sales.amount', 'sales.total_price', 'users.name as user')
+                                           ->select('cards.id', 'cards.name', 'sales.amount', 'sales.total_price', 'users.name as user')
                                            ->get();
                 $response['msg'] = $sales;
             }else{
@@ -242,6 +242,24 @@ class ActionsController extends Controller
             }
 
             $answer = $cards->get();
+        }catch(\Exception $e){
+            $answer['status'] = 0;
+            $answer['msg'] = "Se ha producido un error: ".$e->getMessage();
+        }
+
+        return response()->json($answer);
+    }
+
+    public function asignCards(Request $request){
+        $answer = ['status'=>1, 'msg'=>''];
+        $data = $request->getContent();
+        $data = json_decode($data);
+        $assigned = new assigned_cards();
+        $assigned->id_collection = $data->id_collection;
+        $assigned->id_card = $data->id_card;
+        try{
+            $assigned->save();
+            $answer['msg'] = "Asignation save";
         }catch(\Exception $e){
             $answer['status'] = 0;
             $answer['msg'] = "Se ha producido un error: ".$e->getMessage();
